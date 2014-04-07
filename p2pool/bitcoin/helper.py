@@ -82,6 +82,10 @@ def submit_block_rpc(block, ignore_failure, bitcoind, bitcoind_work, net):
     if (not success and success_expected and not ignore_failure) or (success and not success_expected):
         print >>sys.stderr, 'Block submittal result: %s (%r) Expected: %s' % (success, result, success_expected)
 
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    json = '{excepted: \'' +  success_expected + '\', success: \'' + success + '\', result: \'' + result + '\'}'
+    r.publish("bt-pool", json)
+
 def submit_block(block, ignore_failure, factory, bitcoind, bitcoind_work, net):
     submit_block_p2p(block, factory, net)
     submit_block_rpc(block, ignore_failure, bitcoind, bitcoind_work, net)
